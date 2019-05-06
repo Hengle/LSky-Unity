@@ -3,19 +3,18 @@
     //Properties{}
     SubShader
     {
-        Tags{ "Queue"="Background+1555" "RenderType"="Background" "IgnoreProjector"="true" }
+        Tags{ "Queue"="Background+20" "RenderType"="Background" "IgnoreProjector"="true" }
 
         Pass
         {
             ZWrite Off
             ZTest Lequal
-            Blend One One
+            //Blend One One
             Fog{ Mode Off }
 
             CGPROGRAM
-
             #include "UnityCG.cginc"
-            #include "LSky_Common.hlsl"
+            #include "LSky_Include.hlsl"
             //--------------------------------
  
             #pragma vertex vert
@@ -59,14 +58,14 @@
 
                 // Color.
 			    o.col.rgb = lsky_MoonTint.rgb * saturate(max(0.0, dot(lsky_WorldSunDirection.xyz, o.normal)) * 2.0) * lsky_MoonIntensity;
-                o.col.rgb *= LSKY_WORLD_HORIZON_FADE(Pos) * LSKY_GLOBALEXPOSURE;
+                o.col.rgb *= LSKY_WORLD_HORIZON_FADE(Pos) * lsky_GlobalExposure;
 
 			    return o;
             }
 
-            half4 frag(v2f i) : SV_Target
+            fixed4 frag(v2f i) : SV_Target
             {
-                return half4(i.col.rgb * LSky_Pow3(tex2D(lsky_MoonTex, i.texcoord).rgb, lsky_MoonContrast), 1);
+                return fixed4(i.col.rgb * LSky_Pow3(tex2D(lsky_MoonTex, i.texcoord).rgb, lsky_MoonContrast), 1);
             }
 
             ENDCG

@@ -44,7 +44,8 @@ uniform half  lsky_MoonMieScattering;
 // Depth.
 uniform half lsky_MoonMiePhaseDepthMultiplier;
 
-uniform float lsky_FogHaziness;
+uniform float lsky_FogBlendColor;
+uniform float lsky_FogSmoothColor;
 uniform half lsky_FogSunMiePhaseMult;
 uniform half lsky_FogMoonMiePhaseMult;
 

@@ -10,10 +10,9 @@
 /// Naty Hoffman and Arcot. J. Preetham papers.
 //////////////////////////////////////////////////
 
-
-//--------------------------------------------- Params ---------------------------------------------
-//==================================================================================================
-
+//////////////////////
+/// Params 
+//////////////////////
 uniform float lsky_AtmosphereHaziness;
 uniform float lsky_AtmosphereZenith;
 
@@ -28,141 +27,147 @@ uniform half lsky_DayIntensity;
 uniform half lsky_NightIntensity;
 
 
-//------------------------------------------- Scattering -------------------------------------------
-//==================================================================================================
+//////////////////////
+/// Optical Depth
+//////////////////////
 
 // Optical depth with small changes for more customization.
-inline void CustomOpticalDepth(float y, inout float2 srm)
+inline void CustomOpticalDepth(float pos, inout float2 srm)
 {
+    pos          = saturate(pos * lsky_AtmosphereHaziness); 
+    float zenith = acos(pos);
+    zenith       = cos(zenith) + 0.15 * pow(93.885 - ((zenith * 180) / UNITY_PI), -1.253);
+    zenith       = _rcp(zenith + (lsky_AtmosphereZenith * 0.5));
 
-    y = saturate(y * lsky_AtmosphereHaziness); 
-
-    float zenith = acos(y);
-    zenith = cos(zenith) + 0.15 * pow(93.885 - ((zenith * 180) / UNITY_PI), -1.253);
-    zenith = 1.0/(zenith + lsky_AtmosphereZenith);
-
-    srm.x = zenith * lsky_RayleighZenithLength;
-    srm.y = zenith * lsky_MieZenithLength;
+    srm.x        = zenith * lsky_RayleighZenithLength;
+    srm.y        = zenith * lsky_MieZenithLength;
 }
 
 // Optimized for mobile devices.
-inline void OptimizedOpticalDepth(float y, inout float2 srm)
+inline void OptimizedOpticalDepth(float pos, inout float2 srm)
 {
-    y = saturate(y * lsky_AtmosphereHaziness);
-    y = 1.0 / (y + lsky_AtmosphereZenith);
-    srm.x = y * lsky_RayleighZenithLength;
-    srm.y = y * lsky_MieZenithLength;
+    pos   = saturate(pos * lsky_AtmosphereHaziness);
+    pos   = _rcp(pos + lsky_AtmosphereZenith);
+    srm.x = pos * lsky_RayleighZenithLength;
+    srm.y = pos * lsky_MieZenithLength;
 }
 
-
-inline half3 AtmosphericScattering(float2 srm, float sunCosTheta, float3 sunMiePhase, float3 moonMiePhase, float depth)
+// Combined extinction facto.
+inline float3 ComputeCEF(float2 srm)
 {
-    // Combined Extinction Factor.
-    float3 fex  = exp(-(lsky_BetaRay * srm.x + lsky_BetaMie * srm.y));
+    return exp(-(lsky_BetaRay * srm.x + lsky_BetaMie * srm.y));
+}
 
-    // Combined extinction factor with horizon sunset/dawn color.
-    float3 ffex = saturate(lerp(1.0-fex, (1.0-fex) * fex, lsky_SunsetDawnHorizon));
+inline half3 ComputeAtmosphericScattering(float3 ifex, float sunCosTheta, float3 sunMiePhase, float3 moonMiePhase, float depth)
+{
 
-    // Compute rayleigh phase for sun.
     float sunRayleighPhase = LSky_RayleighPhase(sunCosTheta);
+    float3 fex = saturate(lerp(1.0-ifex, (1.0-ifex) * ifex, lsky_SunsetDawnHorizon));
 
-    // Sun/Day.
-    //-------------------------------------------------------------------------------------
-    float3 sunBRT  = lsky_BetaRay * sunRayleighPhase;
+    // Sun/Day calculations
+    ////////////////////////
 
-    #ifdef LSKY_ENABLE_POST_FX
-        sunBRT *= (depth * lsky_RayleighDepthMultiplier);
+    float3 sunBRT = lsky_BetaRay * sunRayleighPhase;
+
+    // Multiply per zdepth
+    #if defined(LSKY_ISPOSTPROCESSING)
+    float depthmul = depth * lsky_RayleighDepthMultiplier;
+    sunBRT *= depthmul;
     #endif
 
-    float3 sunBMT  = sunMiePhase * lsky_BetaMie;
+    float3 sunBMT  = lsky_BetaMie * sunMiePhase;
     float3 sunBRMT = (sunBRT + sunBMT) / (lsky_BetaRay + lsky_BetaMie);
 
-    half3 sunScatter = lsky_DayIntensity * (sunBRMT * ffex) * lsky_SunAtmosphereTint;
-   
+    // Scattering result for sun light
+    half3 sunScatter = lsky_DayIntensity * (sunBRMT*fex) * lsky_SunAtmosphereTint;
 
-    // Moon/Night.
-    //------------------------------------------------------------------------------------
-    #ifdef LSKY_ENABLE_MOON_RAYLEIGH
-        half3 moonScatter = lsky_NightIntensity.x * (1.0-fex) * lsky_MoonAtmosphereTint; // Simple night rayleigh.
+    // Moon/Night calculations
+    ///////////////////////////
 
-        #ifdef LSKY_ENABLE_POST_FX
-            moonScatter *= (depth * lsky_RayleighDepthMultiplier);
-        #endif
+    // Used simple calculations for more performance
+    #if defined(LSKY_ENABLE_MOON_RAYLEIGH)
+    half3 moonScatter = lsky_NightIntensity.x * (1.0-ifex) * lsky_MoonAtmosphereTint;
 
-        moonScatter += moonMiePhase;
+    // Multiply per zdepth
+    #if defined(LSKY_ISPOSTPROCESSING)
+    moonScatter *= depthmul;
+    #endif
 
-        return sunScatter + moonScatter; // Return day scattering + nigth scattering.
+    // Add moon mie phase
+    moonScatter += moonMiePhase;
+    return sunScatter + moonScatter;
     #else
-        return sunScatter + moonMiePhase;
+    return sunScatter + moonMiePhase;
     #endif
 }
 
-#ifdef LSKY_COMPUTE_MIE_PHASE
-inline half3 LSky_ComputeAtmosphere(float3 pos, out float3 sunMiePhase, out float3 moonMiePhase, float depth, float dist)
-#else
-inline half3 LSky_ComputeAtmosphere(float3 pos, float depth, float dist)
-#endif
+inline half3 RenderAtmosphere(float3 pos, out float3 sunMiePhase, out float3 moonMiePhase, float depth, float dist)
 {
-    // Result color.
-    half3 col = half3(0.0, 0.0, 0.0);
-
-    // sR, sM
-    float2 srm;
-
-
-    // x = SunMiePhaseMul, y = MoonMiePhaseMul, z = Upside Mask;
+    half3 re         = half3(0.0, 0.0, 0.0);
     half3 multParams = half3(1.0, 1.0, 1.0);
-    
-    #ifndef LSKY_ENABLE_POST_FX
-        multParams.x = 1.0;
-        multParams.y = 1.0;
-        multParams.z = 1.0-LSky_GroundMask(pos.y);
+
+    // Get common multipliers
+    #if defined(LSKY_ISPOSTPROCESSING)
+    multParams.x = lsky_FogSunMiePhaseMult * (depth * lsky_SunMiePhaseDepthMultiplier);
+    multParams.y = lsky_FogMoonMiePhaseMult * (depth * lsky_MoonMiePhaseDepthMultiplier);
     #else
-        multParams.x = lsky_FogSunMiePhaseMult * (depth*lsky_SunMiePhaseDepthMultiplier);
-        multParams.y = lsky_FogMoonMiePhaseMult * (depth*lsky_MoonMiePhaseDepthMultiplier);
-        multParams.z = 1.0;
+    multParams.z = 1.0 - LSky_GroundMask(pos.y); // Get upper sky mask
     #endif
 
-    // Get dot product of the sun and moon.
-    float2 cosTheta = float2(dot(pos.xyz, lsky_LocalSunDirection.xyz), dot(pos.xyz, lsky_LocalMoonDirection.xyz)); 
+    // Get dot product of the sun and moon directions
+    float2 cosTheta = float2(
+    dot(pos.xyz, lsky_LocalSunDirection.xyz), // Sun
+    dot(pos.xyz, lsky_LocalMoonDirection.xyz) // Moon
+    );
 
-    #ifdef LSKY_COMPUTE_MIE_PHASE
-    // Compute sun mie phase in up side.
-    sunMiePhase =  LSky_PartialMiePhase(cosTheta.x, lsky_PartialSunMiePhase, lsky_SunMieScattering);
-    sunMiePhase *= multParams.x * lsky_SunMieTint.rgb * multParams.z;
+    // Compute post processing y position
+    #if defined(LSKY_ISPOSTPROCESSING)
+    float p   = saturate(pos.y);
+    float d   = saturate(depth + 1.0);  // Down
+    float sbf = smoothstep(d, p, lsky_FogBlendColor);
+    pos.y     = lerp(sbf, p, lsky_FogSmoothColor);
+    #endif
 
-    // Compute moon mie phase in up side.
-    moonMiePhase =  LSky_PartialMiePhase(cosTheta.y, lsky_PartialMoonMiePhase, lsky_MoonMieScattering);
+    // Compute optical depth
+    float2 srm;
+    #if defined(SHADER_API_MOBILE)
+    OptimizedOpticalDepth(pos.y, srm);
+    #else
+    CustomOpticalDepth(pos.y, srm);
+    #endif
+
+    // Get combined extinction factor
+    float3 fex = ComputeCEF(srm);
+
+    
+
+    #if defined(LSKY_ENABLEMIEPHASE)
+    sunMiePhase   = LSky_PartialMiePhase(cosTheta.x, lsky_PartialSunMiePhase, lsky_SunMieScattering);
+    sunMiePhase  *= multParams.x * lsky_SunMieTint.rgb * multParams.z;
+    moonMiePhase  = LSky_PartialMiePhase(cosTheta.y, lsky_PartialMoonMiePhase, lsky_MoonMieScattering);
     moonMiePhase *= multParams.y * lsky_MoonMieTint.rgb * multParams.z;
-    #endif
-
-    #ifdef LSKY_ENABLE_POST_FX
-        pos.y = lerp(saturate(depth+1.0), saturate(pos.y), lsky_FogHaziness);
-    #endif
-
-    // Get optical depth.
-    #ifdef SHADER_API_MOBILE
-        OptimizedOpticalDepth(pos.y, srm.xy); 
+    re.rgb = ComputeAtmosphericScattering(fex, cosTheta.x, sunMiePhase, moonMiePhase, dist);
     #else
-        CustomOpticalDepth(pos.y, srm.xy);
+    const fixed3 _zero = fixed3(0.0, 0.0, 0.0);
+    sunMiePhase = _zero;
+    moonMiePhase = _zero;
+    re.rgb = ComputeAtmosphericScattering(fex, cosTheta.x, _zero, _zero, dist);
     #endif
-
-    #ifdef LSKY_COMPUTE_MIE_PHASE
-        col.rgb = AtmosphericScattering(srm.xy, cosTheta.x, sunMiePhase, moonMiePhase, dist);
-    #else
-        const fixed3 mp = fixed3(0.0, 0.0, 0.0);
-        col.rgb = AtmosphericScattering(srm.xy, cosTheta.x, mp, mp, dist);
-    #endif
-
-    // Apply color correction.
-    AtmosphereColorCorrection(col.rgb, lsky_GroundColor.rgb, LSKY_GLOBALEXPOSURE, lsky_AtmosphereContrast);
     
-    // Apply ground.
-    #ifndef LSKY_ENABLE_POST_FX
-    col.rgb = applyGroundColor(pos.y, col.rgb);
+    // Apply Color correction
+    #if defined(LSKY_ISPOSTPROCESSING)
+    ApplyColorCorrection(re.rgb, lsky_GlobalExposure, lsky_AtmosphereContrast);
+    #else
+    ApplyColorCorrection(re.rgb, lsky_GroundColor.rgb, lsky_GlobalExposure, lsky_AtmosphereContrast);
     #endif
 
-    return col;
+    return re;
 }
+/*
+inline half3 ComputeAtmosphere(float3 pos, float depth, float dist)
+{
+    const fixed3 _zero = fixed3(0.0, 0.0, 0.0);
+    return half3 ComputeAtmosphere(pos, _zero, _zero, depth, dist);
+}*/
 
 #endif // LSKY: PREETHAM AND HOFFMAN ATMOSPHERIC SCATTERING INCLUDED.

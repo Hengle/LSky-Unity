@@ -8,8 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Atmosphere
-  m_Shader: {fileID: 4800000, guid: 927bf6150e50d49cc8d7c53465d6a059, type: 3}
-  m_ShaderKeywords: LSKY_APPLY_FAST_TONEMAPING LSKY_ENABLE_MOON_RAYLEIGH
+  m_Shader: {fileID: 4800000, guid: 2304fbda64c81a196b44b05853c2700f, type: 3}
+  m_ShaderKeywords: LSKY_APPLY_FAST_TONEMAPING LSKY_ENABLE_MOON_RAYLEIGH LSKY_PER_PIXEL_ATMOSPHERE
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0

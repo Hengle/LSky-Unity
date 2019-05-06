@@ -1,0 +1,59 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!200 &20000000
+ShaderVariantCollection:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: LSky_ShaderVariants
+  m_Shaders:
+  - first: {fileID: 4800000, guid: 2304fbda64c81a196b44b05853c2700f, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: LSKY_ENABLE_MOON_RAYLEIGH
+        passType: 0
+      - keywords: LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0
+      - keywords: LSKY_ENABLE_MOON_RAYLEIGH LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP LSKY_ENABLE_MOON_RAYLEIGH
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP LSKY_ENABLE_MOON_RAYLEIGH LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0
+  - first: {fileID: 4800000, guid: 2b7e5e76a229b1a97903eb0d46778af7, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: LSKY_ENABLE_MOON_RAYLEIGH
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP LSKY_ENABLE_MOON_RAYLEIGH
+        passType: 0
+  - first: {fileID: 4800000, guid: 13f26e43a91d02655956016f4614c01a, type: 3}
+    second:
+      variants:
+      - keywords: 
+        passType: 0
+      - keywords: LSKY_ENABLE_MOON_RAYLEIGH
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP LSKY_ENABLE_MOON_RAYLEIGH
+        passType: 0
+      - keywords: LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0
+      - keywords: LSKY_ENABLE_MOON_RAYLEIGH LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0
+      - keywords: LSKY_APPLY_FAST_TONEMAP LSKY_ENABLE_MOON_RAYLEIGH LSKY_PER_PIXEL_ATMOSPHERE
+        passType: 0

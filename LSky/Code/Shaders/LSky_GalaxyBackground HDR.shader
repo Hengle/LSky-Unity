@@ -1,8 +1,8 @@
-﻿Shader "LSky/Deep Space/LDR/Stars Field"
+﻿Shader "LSky/Deep Space/HDR/Galaxy Background"
 {
 
     //Properties{}
-    CGINCLUDE
+    CGINCLUDE  
     #include "UnityCG.cginc"
     #include "LSky_Include.hlsl"
     #include "LSky_DeepSpaceCommon.hlsl"
@@ -10,8 +10,7 @@
 
     SubShader
     {
-        Tags{ "Queue"="Background+10" "RenderType"="Background" "IgnoreProjector"= "true" }
-
+        Tags{ "Queue"="Background+5" "RenderType"="Background" "IgnoreProjector"= "true" }
         Pass
         {
             Cull Front
@@ -21,11 +20,9 @@
             Fog{ Mode Off }
 
             CGPROGRAM
-            
-            #pragma vertex vert_sf
-            #pragma fragment frag_sf
+            #pragma vertex vert_gb
+            #pragma fragment frag_gb_hdr
             #pragma target 2.0
-
             ENDCG
         }
     }

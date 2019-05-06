@@ -1,11 +1,10 @@
-﻿Shader "LSky/Simple Clouds Old"
+﻿Shader "LSky/Simple Clouds"
 {
 
     //Properties{}
     CGINCLUDE
-
     #include "UnityCG.cginc"
-    #include "LSky_Common.hlsl"
+    #include "LSky_Include.hlsl"
 
     struct appdata
     {
@@ -22,19 +21,15 @@
         UNITY_VERTEX_OUTPUT_STEREO
     };
 
-    // Texture.
     uniform sampler2D lsky_CloudsTex;
     float4 lsky_CloudsTex_ST;
 
-    // Color.
     uniform half4 lsky_CloudsTint;
     uniform half  lsky_CloudsIntensity;
     
-    // Density.
     uniform half lsky_CloudsDensity;
     uniform half lsky_CloudsCoverage;
 
-    // Speed.
     uniform half lsky_CloudsSpeed, lsky_CloudsSpeed2;
 
     v2f vert(appdata_base v)
@@ -50,33 +45,32 @@
         o.texcoord = TRANSFORM_TEX(v.texcoord, lsky_CloudsTex);
         //----------------------------------------------------------------------------
              
-        o.col.rgb = lsky_CloudsTint.rgb * lsky_CloudsIntensity * LSKY_GLOBALEXPOSURE;
+        o.col.rgb = lsky_CloudsTint.rgb * lsky_CloudsIntensity * lsky_GlobalExposure;
         o.col.a   = normalize(v.vertex.xyz-float3(0.0, 0.05, 0.0)).y*2;
         //----------------------------------------------------------------------------
 
         return o;
     }
 
-    half4 frag2(v2f i) : SV_TARGET
+    fixed4 frag(v2f i) : SV_TARGET
     {
         half4 col   = half4(0.0, 0.0, 0.0, 1.0);
-        half noise  = tex2D(lsky_CloudsTex, i.texcoord + _Time.x * lsky_CloudsSpeed).r;
-        half noise2 = tex2D(lsky_CloudsTex, i.texcoord + _Time.x * lsky_CloudsSpeed2).r;
+        fixed noise  = tex2D(lsky_CloudsTex, i.texcoord + _Time.x * lsky_CloudsSpeed).r;
+        fixed noise2 = tex2D(lsky_CloudsTex, i.texcoord + _Time.x * lsky_CloudsSpeed2).r;
         //------------------------------------------------------------------------------
 
-        half coverage = saturate( ((noise+noise2) * 0.5) - lsky_CloudsCoverage);
-        col.rgb       =  (1.0 - coverage * lsky_CloudsTint.a);
-        col.a         = saturate(coverage * lsky_CloudsDensity * i.col.a);
-        //------------------------------------------------------------------------------
+        // Get clouds coverage.
+        fixed coverage = ((((noise+noise2) * 0.5) - lsky_CloudsCoverage)); 
 
-        //col = LSky_FastTonemaping(col, 1.0);
-        col.rgb *= i.col.rgb;
+        // Get clouds color
+        col.rgb  += (1.0 - coverage * lsky_CloudsTint.a) * i.col.rgb;
+
+        // Get clouds alpha.
+        col.a   = saturate(coverage * lsky_CloudsDensity * i.col.a);
         //------------------------------------------------------------------------------
 
         return col;
     }
-
-
     ENDCG
 
     SubShader
@@ -94,11 +88,9 @@
             Fog{ Mode Off }
 
             CGPROGRAM
-
             #pragma vertex vert
-            #pragma fragment frag2
+            #pragma fragment frag
             #pragma target 2.0
-
             ENDCG
         }
 

@@ -170,7 +170,7 @@ namespace LSky
 
         [SerializeField] LSky_AtmosphericScatteringParams parameters = new LSky_AtmosphericScatteringParams
         {
-            applyFastTonemaping = true,
+            applyFastTonemaping = false,
             contrast = 0.5f,
             groundColor = Color.white,
             wavelength = LSky_WavelengthParams.EarthValues,
@@ -196,7 +196,7 @@ namespace LSky
         #region [Keywords]
 
         // General.
-        protected readonly string m_ApplyFastTonemapingKeyword = "LSKY_APPLY_FAST_TONEMAPING";
+        protected readonly string m_ApplyFastTonemapingKeyword = "LSKY_APPLY_FAST_TONEMAP";
         protected readonly string m_PerPixelAtmosphereKeyword  = "LSKY_PER_PIXEL_ATMOSPHERE";
 
         // Rayleigh
@@ -361,11 +361,7 @@ namespace LSky
             
             // General Settings.
             //------------------------------------------------------------------------------------------------------------------------
-            // Apply fast tonemaping.
-            if(parameters.applyFastTonemaping)
-                Shader.EnableKeyword(m_ApplyFastTonemapingKeyword);
-            else
-                Shader.DisableKeyword(m_ApplyFastTonemapingKeyword);
+           
 
             // Set Shader Quality.
             switch(shaderQuality)
@@ -442,6 +438,12 @@ namespace LSky
 
             Shader.SetGlobalFloat(m_DayIntensityID, DayIntensity);
             Shader.SetGlobalFloat(m_NightIntensityID, NightIntensity);
+
+            // Apply fast tonemaping.
+            if(parameters.applyFastTonemaping)
+                Shader.EnableKeyword(m_ApplyFastTonemapingKeyword);
+            else
+                Shader.DisableKeyword(m_ApplyFastTonemapingKeyword);
 
         }
 

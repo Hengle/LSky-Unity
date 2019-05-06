@@ -1,4 +1,4 @@
-﻿Shader "LSky/Deep Space/LDR/Stars Field"
+﻿Shader "LSky/Deep Space/HDR/Stars Field"
 {
 
     //Properties{}
@@ -21,11 +21,9 @@
             Fog{ Mode Off }
 
             CGPROGRAM
-            
             #pragma vertex vert_sf
-            #pragma fragment frag_sf
-            #pragma target 2.0
-
+            #pragma fragment frag_sf_hdr
+            #pragma target 2.0 
             ENDCG
         }
     }

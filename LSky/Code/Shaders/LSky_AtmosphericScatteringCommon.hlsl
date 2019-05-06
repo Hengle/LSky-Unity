@@ -1,38 +1,34 @@
-﻿
-#ifndef LSKY_ATMOSPHERIC_SCATTERING_COMMON
+﻿#ifndef LSKY_ATMOSPHERIC_SCATTERING_COMMON
 #define LSKY_ATMOSPHERIC_SCATTERING_COMMON
 
-
-//------------------------------------------- Def Const --------------------------------------------
-//==================================================================================================
-
-//////////////////////////////////////////////////////////////////
-/// Values Based on Naty Hoffman and Arcot. J. Preetham papers.
-//////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////////
+/// For preetham model and eric brunetton model
+/// Mie phase multiplier is 1.0/(PI*4)
+/// Rayleigh phase multiplier is 3/(PI*16)
+/// I use #define to be able to override the value if another models
+/////////////////////////////////////////////////////////////////////
 
 // Mie Phase
-//-------------------------------------------------
 #ifndef LSKY_MIE_PHASE_MULTIPLIER
-    #define LSKY_MIE_PHASE_MULTIPLIER LSKY_INVPI4 
+#   define LSKY_MIE_PHASE_MULTIPLIER LSKY_INVPI4 
 #endif
 
 // Rayleigh Phase.
-//------------------------------------------------
 #ifndef LSKY_RAYLEIGH_PHASE_MULTIPLIER
-    #define LSKY_RAYLEIGH_PHASE_MULTIPLIER LSKY_3PI16
+#   define LSKY_RAYLEIGH_PHASE_MULTIPLIER LSKY_3PI16
 #endif
 
-//----------------------------------------- Rayleigh Phase -----------------------------------------
-//==================================================================================================
-
+/////////////////////
+/// Rayleigh Phase 
+/////////////////////
 inline float LSky_RayleighPhase(float cosTheta)
 {
     return LSKY_RAYLEIGH_PHASE_MULTIPLIER * (1.0 + cosTheta * cosTheta);    
 }
 
-//-------------------------------------------- Mie Phase -------------------------------------------
-//==================================================================================================
-
+////////////////////
+/// Mie Phase
+////////////////////
 inline float3 LSky_PartialMiePhase(float g)
 {
     float g2 = g * g;
@@ -54,54 +50,35 @@ inline float LSky_PartialMiePhase(float cosTheta, float3 partialMiePhase, half s
     ) * scattering;
 }
 
-//---------------------------------------- Color Correction ----------------------------------------
-//==================================================================================================
+//////////////////////
+/// Color Correction 
+//////////////////////
 
-inline void AtmosphereColorCorrection(inout half3 col, in half exposure, in half exponentFade)
+inline void ApplyColorCorrection(inout half3 col, half exposure, half contrast)
 {
-
-    // Fast Tonemaping.
-    #ifdef LSKY_APPLY_FAST_TONEMAPING
-        col.rgb = LSky_FastTonemaping(col.rgb, exposure);
+    // Apply tonemap
+    #if defined(LSKY_APPLY_FAST_TONEMAP)
+    col.rgb = LSky_FastTonemap(col.rgb, exposure);
     #else
-        col.rgb *= exposure;
+    col.rgb *= exposure;
     #endif
-  	
-    // Color exponent
-    col.rgb = LSky_Pow2(col.rgb, exponentFade);
+
+    // Contrast
+    col.rgb = LSky_Pow2(col.rgb, contrast);
 
     // Color space
-    #ifdef UNITY_COLORSPACE_GAMMA
-        #ifndef SHADER_API_MOBILE
-            col.rgb = LSKY_LINEAR_TO_GAMMA(col.rgb);
-        #else 
-            col.rgb = LSKY_LINEAR_TO_GAMMA_SIMPLE(col.rgb);
-        #endif
+    #if defined(UNITY_COLORSPACE_GAMMA)
+    col.rgb = LSKY_LINEAR_TO_GAMMA(col.rgb);
     #endif
+
 }
 
-inline void AtmosphereColorCorrection(inout half3 col, inout half3 groundCol, in half exposure, in half exponentFade)
+inline void ApplyColorCorrection(inout half3 col, half3 groundCol, half exposure, half contrast)
 {
+    ApplyColorCorrection(col.rgb, exposure, contrast);
 
-    // HDR.
-    #ifdef LSKY_APPLY_FAST_TONEMAPING
-        col.rgb = LSky_FastTonemaping(col.rgb, exposure);
-    #else
-        col.rgb *= exposure;
-    #endif
-
-    // Color exponent
-    col.rgb = LSky_Pow2(col.rgb, exponentFade);
-
-    // Color space
     #ifdef UNITY_COLORSPACE_GAMMA
-        #ifndef SHADER_API_MOBILE
-            col.rgb = LSKY_LINEAR_TO_GAMMA(col.rgb);
-        #else 
-            col.rgb = LSKY_LINEAR_TO_GAMMA_MOBILE(col.rgb);
-        #endif
-    #else
-        groundCol *= groundCol;
+    groundCol.rgb *= groundCol.rgb;
     #endif
 }
 
@@ -110,12 +87,18 @@ inline half LSky_GroundMask(in float pos)
     return saturate(-pos*100);
 }
 
-inline half3 applyGroundColor(float pos, half3 skyCol)
+inline half3 ApplyGroundColor(float pos, half3 skyCol)
+{
+    fixed mask = LSky_GroundMask(pos);
+    return lerp(skyCol.rgb, lsky_GroundColor.rgb * skyCol, mask);
+}
+/*
+inline half3 ApplyGroundColor(float pos, half3 skyCol)
 {
 
     fixed mask = LSky_GroundMask(pos);
     half3 skyContribution =  skyCol * smoothstep(-0.42, 4.2, pos + lsky_GroundColor.a) * mask;
-    return  lerp(skyCol.rgb, lsky_GroundColor.rgb * min(0.5,skyCol), mask) + skyContribution;
-}
+    return  lerp(skyCol.rgb, lsky_GroundColor.rgb * min(0.75, skyCol), mask) + skyContribution;
+}*/
 
 #endif // LSKY: ATMOSPHERIC SCATTERING COMMON INCLUDED.

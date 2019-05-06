@@ -21,7 +21,7 @@ namespace LSky
         [SerializeField] private float m_Density = 0.01f;
         [SerializeField] private float m_StartDistance = 0.0f, m_EndDistance = 300f;
         [SerializeField] private float m_RayleighDepthMultiplier = 1.0f, m_SunMiePhaseDepthMultiplier = 1.0f, m_MoonMiePhaseDepthMultiplier = 1.0f;
-        [SerializeField, Range(0.0f, 1.0f)] private float m_Haziness = 0.75f;
+        [SerializeField, Range(0.0f, 1.0f)] private float m_SmoothColor = 1.0f, m_BlendColor = 0.75f;
         [SerializeField] private float m_SunMiePhaseMult = 5.0f, m_MoonMiePhaseMult = 5.0f;
 
         internal readonly int m_FrustumCornersID = Shader.PropertyToID("lsky_FrustumCorners");
@@ -29,7 +29,8 @@ namespace LSky
         internal readonly int m_SunMiePhaseDepthMultiplierID = Shader.PropertyToID("lsky_SunMiePhaseDepthMultiplier");
         internal readonly int m_MoonMiePhaseDepthMultiplierID = Shader.PropertyToID("lsky_MoonMiePhaseDepthMultiplier");
         internal readonly int m_RayleighDepthMultiplierID = Shader.PropertyToID("lsky_RayleighDepthMultiplier");
-        internal readonly int m_FogHazinessID = Shader.PropertyToID("lsky_FogHaziness");
+        internal readonly int m_FogBlendColorID = Shader.PropertyToID("lsky_FogBlendColor");
+        internal readonly int m_FogSmoothColorID = Shader.PropertyToID("lsky_FogSmoothColor");
         internal readonly int m_FogSunMiePhaseMultID = Shader.PropertyToID("lsky_FogSunMiePhaseMult");
         internal readonly int m_FogMoonMiePhaseMultID = Shader.PropertyToID("lsky_FogMoonMiePhaseMult");
 
@@ -57,7 +58,8 @@ namespace LSky
             FXMaterial.SetFloat(m_SunMiePhaseDepthMultiplierID , m_SunMiePhaseDepthMultiplier);
             FXMaterial.SetFloat(m_MoonMiePhaseDepthMultiplierID , m_MoonMiePhaseDepthMultiplier);
             FXMaterial.SetFloat(m_RayleighDepthMultiplierID, m_RayleighDepthMultiplier);
-            FXMaterial.SetFloat(m_FogHazinessID, m_Haziness);
+            FXMaterial.SetFloat(m_FogBlendColorID, m_BlendColor);
+            FXMaterial.SetFloat(m_FogSmoothColorID, m_SmoothColor);
             FXMaterial.SetFloat(m_FogSunMiePhaseMultID, m_SunMiePhaseMult);
             FXMaterial.SetFloat(m_FogMoonMiePhaseMultID, m_MoonMiePhaseMult);
 
@@ -72,7 +74,7 @@ namespace LSky
                     Vector2 lp;
                     lp.x = m_StartDistance; 
                     lp.y = m_EndDistance; 
-                    FXMaterial.SetVector("lsky_LinearParams", lp);
+                    FXMaterial.SetVector("lsky_FogLinearParams", lp);
 
                 break;
 
@@ -81,7 +83,7 @@ namespace LSky
                     pass = 1;
 
                     float densityExp = m_Density * 1.4426950408f;
-                    FXMaterial.SetFloat("lsky_DensityExp", densityExp);
+                    FXMaterial.SetFloat("lsky_FogDensity", densityExp);
 
                 break;
 
@@ -90,7 +92,7 @@ namespace LSky
                     pass = 2;
 
                     float densityExp2 = m_Density * 1.2011224087f;
-                    FXMaterial.SetFloat("lsky_DensityExp", densityExp2);
+                    FXMaterial.SetFloat("lsky_FogDensity", densityExp2);
 
                 break;
 

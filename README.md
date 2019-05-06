@@ -6,13 +6,13 @@
 Status:
 -------------
 
->- Status: 3.2.0.
+>- Status: 3.2.1.
 >- Support: Built in Render/Monobehaviour.
 -------------
 
 Known Issues
 -------------
->- Preprocessor: Apply Fast Tonemaping Keyword no work in skydome.
+>- 
 -------------
 
 Features:
