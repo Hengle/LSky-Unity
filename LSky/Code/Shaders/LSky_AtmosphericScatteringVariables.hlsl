@@ -9,7 +9,7 @@ uniform half4 lsky_GroundColor;
 
 // Sun.
 uniform half  lsky_SunBrightness;
-uniform half3 lsky_SunAtmosphereTint;
+uniform half4 lsky_SunAtmosphereTint;
 
 // Moon.
 uniform half  lsky_MoonContribution;

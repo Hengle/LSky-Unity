@@ -36,7 +36,7 @@ namespace LSky
 
         [Header("Atmosphere")]
 
-        [SerializeField] private bool m_SetGlobalAtmosphereParams = true;
+        //[SerializeField] private bool m_SetGlobalAtmosphereParams = true;
         public LSky_AtmosphericScattering atmosphere = new LSky_AtmosphericScattering();
 
         [Header("Clouds")]
@@ -124,10 +124,10 @@ namespace LSky
                 atmosphere.sunDir  = SunDirection;
                 atmosphere.moonDir = MoonDirection;
 
-                if(m_SetGlobalAtmosphereParams)
-                    atmosphere.SetGlobalParams(SunEvaluateTime);
-                else
-                    atmosphere.SetParams(m_Resources.atmosphereMaterial, SunEvaluateTime);
+               // if(m_SetGlobalAtmosphereParams)
+                atmosphere.SetGlobalParams(SunEvaluateTime);
+                //else
+                //    atmosphere.SetParams(m_Resources.atmosphereMaterial, SunEvaluateTime);
 
             }
 

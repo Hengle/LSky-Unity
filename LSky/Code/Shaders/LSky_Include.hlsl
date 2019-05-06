@@ -68,9 +68,9 @@ uniform float3 lsky_WorldMoonDirection;
 
 // Color Space
 #ifdef SHADER_API_MOBILE
-#   define LSKY_LINEAR_TO_GAMMA(color) sqrt(color)
+#define LSKY_LINEAR_TO_GAMMA(color) sqrt(color)
 #else
-#   define LSKY_LINEAR_TO_GAMMA(color) pow(color, 0.45454545f)
+#define LSKY_LINEAR_TO_GAMMA(color) pow(color, 0.45454545f)
 #endif
 
 // HDR

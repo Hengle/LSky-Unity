@@ -22,11 +22,11 @@
 
             #pragma vertex vert
             #pragma fragment frag 
-            #pragma target 3.0
+            #pragma target 2.0
 
             #pragma multi_compile __ LSKY_PER_PIXEL_ATMOSPHERE
             #pragma multi_compile __ LSKY_ENABLE_MOON_RAYLEIGH
-            #pragma multi_compile __ LSKY_APPLY_FAST_TONEMAP
+            #pragma multi_compile __ LSKY_APPLY_FAST_TONEMAP 
 
             const fixed _one = 1.0;
 

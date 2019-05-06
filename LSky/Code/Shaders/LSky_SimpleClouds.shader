@@ -76,7 +76,7 @@
     SubShader
     {
         
-        Tags{ "Queue"="Geometry+1745" "RenderType"="Background" "IgnoreProjector"="true" }
+        Tags{ "Queue"="Background+1745" "RenderType"="Background" "IgnoreProjector"="true" }
 
         Pass
         {

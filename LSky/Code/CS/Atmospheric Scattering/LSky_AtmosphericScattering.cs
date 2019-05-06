@@ -196,8 +196,8 @@ namespace LSky
         #region [Keywords]
 
         // General.
-        protected readonly string m_ApplyFastTonemapingKeyword = "LSKY_APPLY_FAST_TONEMAP";
-        protected readonly string m_PerPixelAtmosphereKeyword  = "LSKY_PER_PIXEL_ATMOSPHERE";
+        static readonly string m_ApplyFastTonemapingKeyword = "LSKY_APPLY_FAST_TONEMAP";
+        static readonly string m_PerPixelAtmosphereKeyword  = "LSKY_PER_PIXEL_ATMOSPHERE";
 
         // Rayleigh
         protected readonly string m_EnableMoonRayleighKeyword = "LSKY_ENABLE_MOON_RAYLEIGH";
@@ -446,7 +446,7 @@ namespace LSky
                 Shader.DisableKeyword(m_ApplyFastTonemapingKeyword);
 
         }
-
+        /* 
         /// <summary> Set Glonal Parameters to materials </summary>
         public void SetParams(Material material, float sunEvaluateTime)
         {
@@ -534,7 +534,7 @@ namespace LSky
 
             material.SetFloat(m_DayIntensityID, DayIntensity);
             material.SetFloat(m_NightIntensityID, NightIntensity);
-        }
+        }*/
 
         public void GetBetaRay()
         {

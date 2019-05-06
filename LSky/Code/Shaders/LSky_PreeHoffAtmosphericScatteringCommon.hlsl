@@ -81,6 +81,8 @@ inline half3 ComputeAtmosphericScattering(float3 ifex, float sunCosTheta, float3
     // Scattering result for sun light
     half3 sunScatter = lsky_DayIntensity * (sunBRMT*fex) * lsky_SunAtmosphereTint;
 
+    sunScatter = lerp(sunScatter * (1.0-ifex), sunScatter, lsky_SunAtmosphereTint.a);
+
     // Moon/Night calculations
     ///////////////////////////
 
@@ -95,9 +97,9 @@ inline half3 ComputeAtmosphericScattering(float3 ifex, float sunCosTheta, float3
 
     // Add moon mie phase
     moonScatter += moonMiePhase;
-    return sunScatter + moonScatter;
+    return (sunScatter + moonScatter);
     #else
-    return sunScatter + moonMiePhase;
+    return (sunScatter + moonMiePhase);
     #endif
 }
 
@@ -139,8 +141,6 @@ inline half3 RenderAtmosphere(float3 pos, out float3 sunMiePhase, out float3 moo
     // Get combined extinction factor
     float3 fex = ComputeCEF(srm);
 
-    
-
     #if defined(LSKY_ENABLEMIEPHASE)
     sunMiePhase   = LSky_PartialMiePhase(cosTheta.x, lsky_PartialSunMiePhase, lsky_SunMieScattering);
     sunMiePhase  *= multParams.x * lsky_SunMieTint.rgb * multParams.z;
@@ -159,8 +159,9 @@ inline half3 RenderAtmosphere(float3 pos, out float3 sunMiePhase, out float3 moo
     ApplyColorCorrection(re.rgb, lsky_GlobalExposure, lsky_AtmosphereContrast);
     #else
     ApplyColorCorrection(re.rgb, lsky_GroundColor.rgb, lsky_GlobalExposure, lsky_AtmosphereContrast);
+    re = ApplyGroundColor(pos.y, re);
     #endif
-
+    
     return re;
 }
 /*
