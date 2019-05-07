@@ -1,12 +1,22 @@
 # LSky Dynamic Skydome for Unity Engine.
 -------------
-> I am using this asset for prototypes, I will try to support it in my spare time.
+
+# Pics
+-------------
+
+<img src="Pics/Sky0.png">
+<img src="Pics/Sky1.png">
+<img src="Pics/Sky2.png">
+<img src="Pics/Sky3.png">
+
+--------------
+> I am using this asset for prototypes. this repo is archived LSky v4.0 comming soon.
 --------------
 
 Status:
 -------------
 
->- Status: 3.2.1.
+>- Status: 3.2.1 Archived.
 >- Support: Built in Render/Monobehaviour.
 -------------
 
