@@ -15,7 +15,7 @@
 
 #Donate?
 --------------
-If someone wants to help the asset stay alive, you can do it through patreon, later share other assets that I am using in my projects : https://www.patreon.com/user/overview?u=19985678
+You can do it through patreon, later share other assets that I am using in my projects : https://www.patreon.com/user/overview?u=19985678
 --------------
 
 Status:
