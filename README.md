@@ -13,11 +13,6 @@
 > I am using this asset for prototypes. this repo is archived LSky v4.0 comming soon.
 --------------
 
-# Donate?
---------------
-You can do it through patreon, later share other assets that I am using in my projects : https://www.patreon.com/user/overview?u=19985678
---------------
-
 Status:
 -------------
 
