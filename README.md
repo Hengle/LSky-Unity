@@ -10,7 +10,7 @@
 <img src="Pics/Sky3.png">
 
 --------------
-> I am using this asset for prototypes. this repo is archived LSky v4.0 comming soon.
+> I am using this asset for prototypes. this repo is archived Celeste Sky comming soon.
 --------------
 
 Status:
@@ -24,6 +24,12 @@ Known Issues
 -------------
 >- 
 -------------
+
+Invite me a coffee:
+-------------------
+
+> ko-fi.com/rallec
+-------------------
 
 Features:
 --------------
@@ -71,3 +77,4 @@ Utility:
 - Reflection probes refresh scripts.
 - Editor: Foldout header
 --------------
+
