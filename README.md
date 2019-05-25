@@ -1,6 +1,12 @@
 # LSky Dynamic Skydome for Unity Engine.
 -------------
 
+# Notice
+>The new system will be uploaded to this repo in a few days.
+>https://github.com/CelesteSky/Celeste-Sky-Unity
+
+>This repository will be eliminated, since celeste sky is a cleaner version and ready for production, so it does not make sense that this code is preserved.
+
 # Pics
 -------------
 
